@@ -6,5 +6,12 @@
   "dependencies": {
     "firebase-admin": "^8.6.0",
     "shelljs": "^0.8.3"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "devDependencies": {
+    "nodemon": "^1.19.3"
   }
 }
