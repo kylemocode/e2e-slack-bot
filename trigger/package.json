@@ -8,8 +8,5 @@
   "dependencies": {
     "now": "^16.3.1",
     "server": "^1.0.19"
-  },
-  "engines": {
-    "node": "10.16.0"
   }
 }
