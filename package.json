@@ -4,6 +4,9 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "@slack/events-api": "^2.3.0",
+    "@slack/web-api": "^5.2.1",
+    "dotenv": "^8.1.0",
     "firebase-admin": "^8.6.0",
     "shelljs": "^0.8.3"
   },
