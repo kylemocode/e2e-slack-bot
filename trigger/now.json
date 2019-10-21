@@ -1,10 +1,12 @@
 {
-    "version": 2,
-    "builds": [
-        {
-          "src": "./index.js", 
-          "use": "@now/node-server"
-        }
-    ]
+  "version": 2,
+  "env": {
+    "SLACK_TOKEN": "@slack-token"
+  },
+  "builds": [
+    {
+      "src": "./index.js",
+      "use": "@now/node-server"
+    }
+  ]
 }
-
