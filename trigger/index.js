@@ -25,7 +25,7 @@ server({ port: 8082, security: { csrf: false } }, [
         await runnerRef.set({
           branch: dataList[1],
           type: dataList[0],
-          timestamp: new Date()
+          timestamp: new Date().getTime()
         });
         isRunning = false;
       }
