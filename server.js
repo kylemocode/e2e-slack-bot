@@ -1,28 +1,65 @@
-const admin = require('firebase-admin');
+const admin = require("firebase-admin");
+const shell = require("shelljs");
+const slackWebClient = require("./slackAPI");
+let serviceAccount = require("./serviceAccountKey.json");
+require("dotenv").config();
 
-const shell = require('shelljs');
-
-var serviceAccount = require("./serviceAccountKey.json");
-
+console.log("Testing server is running...");
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: 'https://e2e-dino.firebaseio.com/'
+  databaseURL: "https://e2e-dino.firebaseio.com/"
 });
 
+let db = admin.database();
+let runnerRef = db.ref("/runner");
+let isRunningRef = db.ref("/isRunning");
+let isRunning = false;
+let firstRun = true;
 
-var db = admin.database();
-var ref = db.ref("/");
-ref.once("child_changed", function (snapshot) {
+isRunningRef.on("value", snapshot => {
+  if (snapshot.val().isRunning == true) {
+    isRunning = true;
+  } else {
+    isRunning = false;
+  }
+});
+
+runnerRef.on("value", async function(snapshot) {
+  // dont't exec shell script when server first run
+  if (firstRun) {
+    firstRun = false;
+    return;
+  }
+
   const data = snapshot.val();
-  console.log(data);
-  const {
-    branch,
-    type,
-  } = data;
-  shell.exec(`echo 'Roger, I will start to test "${type}" on this branch(${branch})'`);
-  // TODO
-  /**
-   * 1. 是否可以執行？ running
-   * 2. 執行某個測試
-   */
+  const { branch, type } = data;
+
+  if (isRunning) {
+    await slackWebClient.chat.postMessage({
+      channel: "e2e-bot",
+      text: "Test server is running, please wait..."
+    });
+    return;
+  } else {
+    await isRunningRef.set({
+      isRunning: true
+    });
+    await slackWebClient.chat.postMessage({
+      channel: "e2e-bot",
+      text: "E2E testing start..."
+    });
+  }
+
+  // give permission to shell script
+  shell.exec("chmod 755 server.sh");
+  shell.exec(`./server.sh ${type} ${branch}`);
+
+  await isRunningRef.set({
+    isRunning: false
+  });
+
+  await slackWebClient.chat.postMessage({
+    channel: "e2e-bot",
+    text: "Test finish, check your result right now."
+  });
 });
