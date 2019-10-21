@@ -24,10 +24,10 @@ server({ port: 8082, security: { csrf: false } }, [
         const dataList = data.split(" ");
         await runnerRef.set({
           branch: dataList[1],
-          type: dataList[0]
+          type: dataList[0],
+          timestamp: new Date()
         });
         isRunning = false;
-        console.log(dataList);
       }
     });
 
