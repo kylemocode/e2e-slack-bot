@@ -1,8 +1,5 @@
 {
   "version": 2,
-  "env": {
-    "SLACK_TOKEN": "@slack-token"
-  },
   "builds": [
     {
       "src": "./index.js",
