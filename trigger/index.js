@@ -16,12 +16,12 @@ server({ port: 8082, security: { csrf: false } }, [
   get("/", ctx => "Hello world!!"),
   post("/", async ctx => {
     let isRunning;
+    const data = ctx.data.text;
+    const dataList = data.split(" ");
     await isRunningRef.once("value", async snapshot => {
       if (snapshot.val().isRunning == true) {
         isRunning = true;
       } else {
-        const data = ctx.data.text;
-        const dataList = data.split(" ");
         await runnerRef.set({
           branch: dataList[1],
           type: dataList[0],
@@ -34,7 +34,7 @@ server({ port: 8082, security: { csrf: false } }, [
     if (isRunning === true) {
       return "E2E server is running, please wait...";
     } else {
-      return "change firebase data success";
+      return `Ready to test ${dataList[0]} platform, on branch ${dataList[1]}`;
     }
   })
 ]);
