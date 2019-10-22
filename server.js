@@ -13,6 +13,7 @@ admin.initializeApp({
 let db = admin.database();
 let runnerRef = db.ref("/runner");
 let isRunningRef = db.ref("/isRunning");
+let cancelRef = db.ref("/cancel");
 let isRunning = false;
 let firstRun = true;
 
@@ -50,16 +51,29 @@ runnerRef.on("value", async function(snapshot) {
     });
   }
 
-  // give permission to shell script
-  shell.exec("chmod 755 server.sh");
-  shell.exec(`./server.sh ${type} ${branch}`);
+  shell.exec(`source server.sh ${type} ${branch}`, async function(
+    code,
+    stdout,
+    stderr
+  ) {
+    await isRunningRef.set({
+      isRunning: false
+    });
 
-  await isRunningRef.set({
-    isRunning: false
-  });
-
-  await slackWebClient.chat.postMessage({
-    channel: "e2e-bot",
-    text: "Test finish, check your result right now."
+    await slackWebClient.chat.postMessage({
+      channel: "e2e-bot",
+      text: checkStatus(code)
+    });
   });
 });
+
+function checkStatus(code) {
+  switch (code) {
+    case 0:
+      return "Test finish, check your result right now.";
+    case 1:
+      return "Test fail, please check the server...";
+    case 2:
+      return "Build fail, please check the server...";
+  }
+}
