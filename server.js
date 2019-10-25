@@ -1,10 +1,12 @@
 const admin = require("firebase-admin");
 const shell = require("shelljs");
+const fs = require("fs");
 const slackWebClient = require("./slackAPI");
 let serviceAccount = require("./serviceAccountKey.json");
 require("dotenv").config();
 
 console.log("Testing server is running...");
+shell.exec(`./pythonServer.sh`, { async: true });
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: "https://e2e-dino.firebaseio.com/"
@@ -16,7 +18,12 @@ let isRunningRef = db.ref("/isRunning");
 let cancelRef = db.ref("/cancel");
 let isRunning = false;
 let firstRun = true;
+let CancelfirstRun = true;
+let shellProcess;
 
+cancelRef.set({
+  cancel: false
+});
 isRunningRef.on("value", snapshot => {
   if (snapshot.val().isRunning == true) {
     isRunning = true;
@@ -51,20 +58,47 @@ runnerRef.on("value", async function(snapshot) {
     });
   }
 
-  shell.exec(`source server.sh ${type} ${branch}`, async function(
-    code,
-    stdout,
-    stderr
-  ) {
-    await isRunningRef.set({
-      isRunning: false
-    });
+  shellProcess = shell.exec(
+    `source server.sh ${type} ${branch}`,
+    async function(code, stdout, stderr) {
+      if (stderr && code !== 0) {
+        const now = new Date();
+        const month = now.getMonth();
+        const day = now.getDate();
+        const hour = now.getHours();
+        const minute = now.getMinutes();
+        fs.writeFileSync(
+          `./error-log/${month}-${day}-${hour}-${minute}.txt`,
+          stderr
+        );
+      }
 
-    await slackWebClient.chat.postMessage({
-      channel: "e2e-bot",
-      text: checkStatus(code)
-    });
-  });
+      await isRunningRef.set({
+        isRunning: false
+      });
+
+      await slackWebClient.chat.postMessage({
+        channel: "e2e-bot",
+        text: checkStatus(code)
+      });
+
+      await cancelRef.set({
+        cancel: false
+      });
+    }
+  );
+  // console.log("pid", shellProcess.pid);
+});
+
+cancelRef.on("value", snapshot => {
+  if (CancelfirstRun) {
+    CancelfirstRun = false;
+    return;
+  }
+  if (snapshot.val().cancel === true) {
+    // console.log(shellProcess.pid);
+    shell.exec(`kill -9 ${shellProcess.pid}`);
+  }
 });
 
 function checkStatus(code) {
@@ -72,8 +106,8 @@ function checkStatus(code) {
     case 0:
       return "Test finish, check your result right now.";
     case 1:
-      return "Test fail, please check the server...";
-    case 2:
-      return "Build fail, please check the server...";
+      return `Test fail.....please checkout the error log`;
+    default:
+      return "There are some unexpected events occured....";
   }
 }
