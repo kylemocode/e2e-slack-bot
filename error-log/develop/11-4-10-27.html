@@ -1,0 +1,44 @@
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"><pre>error: Your local changes to the following files would be overwritten by checkout:
+	e2e/scenarios/login/shoppingCart/categoryProducts/categoryAddToCart.spec.js
+Please commit your changes or stash them before you switch branches.
+Aborting
+detox[41094] INFO:  [build.js] [32myarn ios:testing[39m
+detox[42174] INFO:  [test.js] [32mconfiguration="ios.sim.debug" artifactsLocation="artifacts/ios.sim.debug.2019-11-04 02-26-32Z" recordLogs="none" takeScreenshots="manual" recordVideos="none" recordPerformance="none" reportSpecs=true node_modules/.bin/jest --config=e2e/config.json --maxWorkers=1 '--testNamePattern=^((?!:android:).)*$' e2e/scenarios/login/shoppingCart/categoryProducts/categoryAddToCart[39m
+detox[42176] INFO:  [DetoxServer.js] [32mserver listening on localhost:54930...[39m
+detox[42176] INFO:  [AppleSimUtils.js] [32mcom.verybuy.verybuy launched. To watch simulator logs, run:[39m
+[32m        /usr/bin/xcrun simctl spawn 9A370800-7C45-42C5-BB5A-532B6A44F859 log stream --level debug --style compact --predicate 'processImagePath beginsWith "/Users/oldmo860617/Library/Developer/CoreSimulator/Devices/9A370800-7C45-42C5-BB5A-532B6A44F859/data/Containers/Bundle/Application/7F322D7F-2701-4857-A0E9-585F59F5DB77/verybuy.app"'[39m
+FAIL e2e/scenarios/login/shoppingCart/categoryProducts/categoryAddToCart.spec.js (63.615s)
+  [After login] category product add to cart
+    ✓ Should render login and register page (2497ms)
+    ✓ Should navigate to login form page (1323ms)
+    ✓ Enter email and password and then login successfully (6043ms)
+    ✓ click 非常勸敗 tab and navigate to mainpage (1495ms)
+    ✕ should scroll category list and click one of them (3577ms)
+    ✓ scroll down and click one product (5849ms)
+    ✓ scroll down and click add to cart btn (12875ms)
+    ✓ select color and size before add to shopping cart or buy it (2632ms)
+    ✓ click add to cart btn and go to cart page (3341ms)
+
+  ● [After login] category product add to cart › should scroll category list and click one of them
+
+    TypeError: expect(...).not is not a function
+
+      15 |     await element(by.id(testIDs.CategoryItem.CATEGORY_PAIR + '3_0')).tap();
+      16 |     await expect(element(by.id(testIDs.ListPage.LISTPAGE_FLATLIST)))
+    > 17 |       .not()
+         |        ^
+      18 |       .toBeVisible();
+      19 |   });
+      20 | 
+
+      at _callee2$ (scenarios/login/shoppingCart/categoryProducts/categoryAddToCart.spec.js:17:8)
+      at tryCatch (../node_modules/regenerator-runtime/runtime.js:45:40)
+      at Generator.invoke [as _invoke] (../node_modules/regenerator-runtime/runtime.js:271:22)
+      at Generator.prototype.(anonymous function) [as next] (../node_modules/regenerator-runtime/runtime.js:97:21)
+      at tryCatch (../node_modules/regenerator-runtime/runtime.js:45:40)
+      at invoke (../node_modules/regenerator-runtime/runtime.js:135:20)
+      at ../node_modules/regenerator-runtime/runtime.js:145:13
+
+detox[42174] ERROR: [cli.js] [31mError: Command failed: node_modules/.bin/jest --config=e2e/config.json --maxWorkers=1 '--testNamePattern=^((?!:android:).)*$' e2e/scenarios/login/shoppingCart/categoryProducts/categoryAddToCart[39m
+
+</pre>

@@ -15,10 +15,8 @@ admin.initializeApp({
 let db = admin.database();
 let runnerRef = db.ref("/runner");
 let isRunningRef = db.ref("/isRunning");
-let cancelRef = db.ref("/cancel");
 let isRunning = false;
 let firstRun = true;
-let CancelfirstRun = true;
 let shellProcess;
 
 cancelRef.set({
@@ -48,7 +46,7 @@ runnerRef.on("value", async function(snapshot) {
       text: "Test server is running, please wait..."
     });
     return;
-  } else {
+  } else  {
     await isRunningRef.set({
       isRunning: true
     });
@@ -56,50 +54,39 @@ runnerRef.on("value", async function(snapshot) {
       channel: "e2e-bot",
       text: "E2E testing start..."
     });
-  }
 
-  shellProcess = shell.exec(
-    `source server.sh ${type} ${branch}`,
-    async function(code, stdout, stderr) {
-      if (stderr && code !== 0) {
-        const now = new Date();
-        const month = now.getMonth();
-        const day = now.getDate();
-        const hour = now.getHours();
-        const minute = now.getMinutes();
-        fs.writeFileSync(
-          `./error-log/${month}-${day}-${hour}-${minute}.txt`,
-          stderr
-        );
+    shellProcess = shell.exec(
+      `source server.sh ${type} ${branch}`,
+      async function(code, stdout, stderr) {
+        if (stderr && code !== 0) {
+          const now = new Date();
+          const month = now.getMonth();
+          const day = now.getDate();
+          const hour = now.getHours();
+          const minute = now.getMinutes();
+          fs.writeFileSync(
+            `./error-log/${branch}-${month+1}-${day}-${hour}-${minute}.txt`,
+            stderr
+          );
+        }
+  
+        await isRunningRef.set({
+          isRunning: false
+        });
+  
+        await slackWebClient.chat.postMessage({
+          channel: "e2e-bot",
+          text: checkStatus(code)
+        });
+  
+        await cancelRef.set({
+          cancel: false
+        });
       }
-
-      await isRunningRef.set({
-        isRunning: false
-      });
-
-      await slackWebClient.chat.postMessage({
-        channel: "e2e-bot",
-        text: checkStatus(code)
-      });
-
-      await cancelRef.set({
-        cancel: false
-      });
-    }
-  );
-  // console.log("pid", shellProcess.pid);
-});
-
-cancelRef.on("value", snapshot => {
-  if (CancelfirstRun) {
-    CancelfirstRun = false;
-    return;
-  }
-  if (snapshot.val().cancel === true) {
-    // console.log(shellProcess.pid);
-    shell.exec(`kill -9 ${shellProcess.pid}`);
+    );
   }
 });
+
 
 function checkStatus(code) {
   switch (code) {
