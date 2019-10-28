@@ -94,7 +94,7 @@ runnerRef.on("value", async function(snapshot) {
 function checkStatus(code, fileName,branch) {
   switch (code) {
     case 0:
-      return "Test finish, check your result right now.";
+      return "Test finish and pass, check your result right now.";
     case 1:
       return `Test fail.....please checkout the error log at : ${process.env.IP_ADDRESS}${branch}/${fileName}`;
     default:
