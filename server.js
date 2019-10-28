@@ -6,7 +6,7 @@ let serviceAccount = require("./serviceAccountKey.json");
 require("dotenv").config();
 
 console.log("Testing server is running...");
-shell.exec(`./pythonServer.sh`, { async: true });
+
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: "https://e2e-dino.firebaseio.com/"
@@ -29,15 +29,22 @@ isRunningRef.on("value", snapshot => {
 });
 
 runnerRef.on("value", async function(snapshot) {
+  const data = snapshot.val();
+  const { branch, type } = data;
+  let localBranch;
+  let isRemoteBranch = branch.includes("/");
+  if(isRemoteBranch) {
+    localBranch = branch.split('/').pop();
+  }else {
+    localBranch = branch;
+  }
   // dont't exec shell script when server first run
   if (firstRun) {
+    shell.exec(`./pythonServer.sh ${localBranch}`, { async: true });
     firstRun = false;
     return;
   }
-
-  const data = snapshot.val();
-  const { branch, type } = data;
-
+  
   if (isRunning) {
     await slackWebClient.chat.postMessage({
       channel: "e2e-bot",
@@ -62,8 +69,9 @@ runnerRef.on("value", async function(snapshot) {
           const day = now.getDate();
           const hour = now.getHours();
           const minute = now.getMinutes();
+          var fileName = `${month+1}-${day}-${hour}-${minute}.txt`
           fs.writeFileSync(
-            `./error-log/${branch}-${month+1}-${day}-${hour}-${minute}.txt`,
+            `./error-log/${localBranch}/${month+1}-${day}-${hour}-${minute}.txt`,
             stderr
           );
         }
@@ -74,24 +82,21 @@ runnerRef.on("value", async function(snapshot) {
   
         await slackWebClient.chat.postMessage({
           channel: "e2e-bot",
-          text: checkStatus(code)
+          text: checkStatus(code,fileName,localBranch)
         });
   
-        await cancelRef.set({
-          cancel: false
-        });
       }
     );
   }
 });
 
 
-function checkStatus(code) {
+function checkStatus(code, fileName,branch) {
   switch (code) {
     case 0:
       return "Test finish, check your result right now.";
     case 1:
-      return `Test fail.....please checkout the error log`;
+      return `Test fail.....please checkout the error log at : ${process.env.IP_ADDRESS}${branch}/${fileName}`;
     default:
       return "There are some unexpected events occured....";
   }
