@@ -19,9 +19,7 @@ let isRunning = false;
 let firstRun = true;
 let shellProcess;
 
-cancelRef.set({
-  cancel: false
-});
+
 isRunningRef.on("value", snapshot => {
   if (snapshot.val().isRunning == true) {
     isRunning = true;
