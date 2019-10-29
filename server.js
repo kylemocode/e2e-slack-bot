@@ -33,11 +33,16 @@ runnerRef.on("value", async function(snapshot) {
   const { branch, type } = data;
   let localBranch;
   let isRemoteBranch = branch.includes("/");
-  if(isRemoteBranch) {
+  if(isRemoteBranch) { 
     localBranch = branch.split('/').pop();
   }else {
     localBranch = branch;
   }
+
+  if (!fs.existsSync(`./error-log/${localBranch}`)) {
+    fs.mkdirSync(`./error-log/${localBranch}`, 0777);
+  }
+  
   // dont't exec shell script when server first run
   if (firstRun) {
     shell.exec(`./pythonServer.sh ${localBranch}`, { async: true });
