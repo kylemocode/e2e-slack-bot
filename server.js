@@ -69,10 +69,11 @@ runnerRef.on("value", async function(snapshot) {
           const day = now.getDate();
           const hour = now.getHours();
           const minute = now.getMinutes();
-          var fileName = `${month+1}-${day}-${hour}-${minute}.txt`
+          var fileName = `${month+1}-${day}-${hour}-${minute}.html`
           fs.writeFileSync(
-            `./error-log/${localBranch}/${month+1}-${day}-${hour}-${minute}.txt`,
-            stderr
+            `./error-log/${localBranch}/${month+1}-${day}-${hour}-${minute}.html`,
+            '<pre>'+stderr+'</pre>',
+            'utf8'
           );
         }
   
