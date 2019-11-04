@@ -19,7 +19,6 @@ let isRunning = false;
 let firstRun = true;
 let shellProcess;
 
-
 isRunningRef.on("value", snapshot => {
   if (snapshot.val().isRunning == true) {
     isRunning = true;
@@ -33,30 +32,30 @@ runnerRef.on("value", async function(snapshot) {
   const { branch, type } = data;
   let localBranch;
   let isRemoteBranch = branch.includes("/");
-  if(isRemoteBranch) { 
-    localBranch = branch.split('/').pop();
-  }else {
+  if (isRemoteBranch) {
+    localBranch = branch.split("/").pop();
+  } else {
     localBranch = branch;
   }
 
   if (!fs.existsSync(`./error-log/${localBranch}`)) {
     fs.mkdirSync(`./error-log/${localBranch}`, 0777);
   }
-  
+
   // dont't exec shell script when server first run
   if (firstRun) {
     shell.exec(`./pythonServer.sh ${localBranch}`, { async: true });
     firstRun = false;
     return;
   }
-  
+
   if (isRunning) {
     await slackWebClient.chat.postMessage({
       channel: "e2e-bot",
       text: "Test server is running, please wait..."
     });
     return;
-  } else  {
+  } else {
     await isRunningRef.set({
       isRunning: true
     });
@@ -74,30 +73,31 @@ runnerRef.on("value", async function(snapshot) {
           const day = now.getDate();
           const hour = now.getHours();
           const minute = now.getMinutes();
-          var fileName = `${month+1}-${day}-${hour}-${minute}.html`
+          var fileName = `${month + 1}-${day}-${hour}-${minute}.html`;
           fs.writeFileSync(
-            `./error-log/${localBranch}/${month+1}-${day}-${hour}-${minute}.html`,
-            '<pre>'+stderr+'</pre>',
-            'utf8'
+            `./error-log/${localBranch}/${month +
+              1}-${day}-${hour}-${minute}.html`,
+            '<meta http-equiv="Content-Type" content="text/html; charset=utf-8"><pre>' +
+              stderr +
+              "</pre>",
+            "utf8"
           );
         }
-  
+
         await isRunningRef.set({
           isRunning: false
         });
-  
+
         await slackWebClient.chat.postMessage({
           channel: "e2e-bot",
-          text: checkStatus(code,fileName,localBranch)
+          text: checkStatus(code, fileName, localBranch)
         });
-  
       }
     );
   }
 });
 
-
-function checkStatus(code, fileName,branch) {
+function checkStatus(code, fileName, branch) {
   switch (code) {
     case 0:
       return "Test finish and pass, check your result right now.";
