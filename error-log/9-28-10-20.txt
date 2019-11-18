@@ -1,2 +1,0 @@
-Already on 'develop'
-detox[42166] INFO:  [build.js] [32myarn ios:testing[39m
