@@ -2,12 +2,13 @@
 cd ~/desktop/verybuy-native
 git checkout $2
 yarn
-cd ios
-pod install
-cd ../
+
 if [ "$1" = "app/ios" ]
 then
 	echo "Run app ios e2e"
+	cd ios
+	pod install
+	cd ../
     npx detox build -c ios.sim.debug
 	npx detox test -c ios.sim.debug
 elif [ "$1" = "app/android" ]
