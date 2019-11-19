@@ -1,6 +1,7 @@
 # e2e-bot
 
 # Firebase rule
+
 ```
 {
   "rules": {
@@ -27,3 +28,9 @@
   }
 }
 ```
+
+### 使用方式
+
+- yarn run start 開啟 server
+- slack e2e-bot channel 輸入以下格式： /e2e app origin/develop (/e2e ${type} ${branch})
+- 若要測試遠端 branch 需加 origin.

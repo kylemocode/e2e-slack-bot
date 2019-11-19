@@ -1,2 +1,5 @@
 node_modules
 serviceAccountKey.json
+.env
+yarn-error.log
+error-log
